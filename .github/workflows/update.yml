@@ -2,13 +2,13 @@ name: Run Emote Sniper
 
 on:
   schedule:
-    - cron: "0 * * * *" 
-  workflow_dispatch: 
+    - cron: "0 * * * *"  
+  workflow_dispatch:  
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
-    timeout-minutes: 30 
+    timeout-minutes: 30  
     
     permissions:
       contents: write
@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0 
+          fetch-depth: 0  
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -41,11 +41,11 @@ jobs:
         run: |
           changes=false
           for file in EmoteSniper.json AnimationSniper.json AnimationSniperoffsale.json; do
-            if git diff --quiet "$file"; then
-              echo "No changes detected in $file"
-            else
+            if git status --porcelain | grep -q "$file"; then
               echo "Changes detected in $file"
               changes=true
+            else
+              echo "No changes detected in $file"
             fi
           done
           echo "changes=$changes" >> $GITHUB_OUTPUT
