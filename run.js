@@ -12,19 +12,19 @@ const APIs = [
         name: "Latest API",
         baseUrl:
             "https://catalog.roproxy.com/v1/search/items/details?Category=12&Subcategory=39&Limit=30&salesTypeFilter=1&SortType=3",
-        outputFile: "EmoteSniper.json"
+        outputFile: "Emote.json"
     },
     {
         name: "Basic Animation API",
         baseUrl:
             "https://catalog.roproxy.com/v1/search/items/details?Category=12&Subcategory=38&salesTypeFilter=1&Limit=30",
-        outputFile: "AnimationSniper.json"
+        outputFile: "Animation.json"
     },
     {
         name: "Latest Animation API",
         baseUrl:
             "https://catalog.roproxy.com/v1/search/items/details?Category=12&Subcategory=38&salesTypeFilter=1&Limit=30&SortType=3",
-        outputFile: "AnimationSniper.json"
+        outputFile: "Animation.json"
     },
     {
         name: "offsale Animation API",
@@ -215,7 +215,6 @@ async function processAPIsByFile() {
 
             log(`${api.name} - New: ${result.newItems}, Duplicates: ${result.duplicates}`);
         }
-
 
         const saveSuccess = saveData(allItems, filename);
 
