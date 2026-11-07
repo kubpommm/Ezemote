@@ -1,0 +1,22 @@
+name: Auto Run Script
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # รันอัตโนมัติทุกวัน ตอนเที่ยงคืน UTC (ปรับเวลาได้ตามต้องการ)
+  workflow_dispatch: # เปิดให้กดรันเองแบบ Manual ได้ด้วย
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run script
+        run: node run.js
