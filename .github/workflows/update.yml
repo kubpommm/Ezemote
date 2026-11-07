@@ -1,22 +1,72 @@
-name: Auto Run Script
+name: Run Emote Sniper
 
 on:
   schedule:
-    - cron: '0 0 * * *' # รันอัตโนมัติทุกวัน ตอนเที่ยงคืน UTC (ปรับเวลาได้ตามต้องการ)
-  workflow_dispatch: # เปิดให้กดรันเองแบบ Manual ได้ด้วย
+    - cron: "0 * * * *" 
+  workflow_dispatch: 
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
+    timeout-minutes: 30 
+    
+    permissions:
+      contents: write
+      actions: read
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0 
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 22
 
-      - name: Run script
-        run: node run.js
+      - name: Install Dependencies
+        run: npm install --no-optional || echo "No dependencies found"
+
+      - name: Run Emote Sniper Script
+        run: |
+          echo "Starting EmoteSniper update..."
+          node run.js
+          echo "Script execution completed"
+        timeout-minutes: 25
+
+      - name: Check for Changes
+        id: check-changes
+        run: |
+          changes=false
+          for file in EmoteSniper.json AnimationSniper.json AnimationSniperoffsale.json; do
+            if git diff --quiet "$file"; then
+              echo "No changes detected in $file"
+            else
+              echo "Changes detected in $file"
+              changes=true
+            fi
+          done
+          echo "changes=$changes" >> $GITHUB_OUTPUT
+
+      - name: Commit and Push Changes
+        if: steps.check-changes.outputs.changes == 'true'
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add EmoteSniper.json AnimationSniper.json AnimationSniperoffsale.json
+          git commit -m "🤖 Auto update data - $(date '+%Y-%m-%d %H:%M:%S UTC')"
+          git push origin ${{ github.ref_name }}
+
+      - name: Update Summary
+        if: always()
+        run: |
+          echo "## 📊 Sniper Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp:** $(date)" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check-changes.outputs.changes }}" == "true" ]; then
+            echo "- **Changes:** ✅ Data updated and committed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Changes:** ⚪ No changes detected" >> $GITHUB_STEP_SUMMARY
+          fi
